@@ -30,5 +30,5 @@ fs.readdir("./src/events/giveaways", (_err, files) => {
   })
 })
 
-client.start("OTYyNDg5NDI1MzQ1MDE5OTM0.GU1Hb_.cJldeIVurckCcQgbrX9RVLDNHzcPlR7rSNI4m8");
+client.start(process.env.TOKEN);
 
