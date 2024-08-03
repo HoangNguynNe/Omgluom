@@ -42,7 +42,7 @@ module.exports = {
         // Gọi hàm addpartner với các tham số
         if(client.partner.addpartner(messageID, tagUser.id, userID, linkserver)){
           const guildMember = message.guild.members.cache.get(tagUser.id);
-          await guildMember.roles.add(role_Partners);
+          await guildMember.roles.add(role_Partner);
           message.reply(`Đã thêm partner thành công!`);
         }
       } catch (error) {

@@ -4,7 +4,7 @@ const path = require('path');
 module.exports = {
   name: 'editresponder',
   category: '🔰 Responder',
-  aliases: ['ers', 'eresponder'],
+  aliases: ['eres', 'eresponder'],
   usage: '<PREFIX>eresponder [keyword] <newResponse>',
   description: 'Sửa responder',
   run: async (client, message, args) => {

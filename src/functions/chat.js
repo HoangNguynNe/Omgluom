@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const diacritics = require('diacritics');
 
 const responsesFilePath = path.join(__dirname, 'responses.txt');
 let responses = new Map();
@@ -32,6 +33,7 @@ loadResponses();
 
 async function Chat(client) {
     client.on('messageCreate', async (message) => {
+
         if (message.author.bot) return;
 
         // Kiểm tra nếu channel ID là '889331496559722595'
@@ -46,17 +48,55 @@ async function Chat(client) {
 
         // Xử lý phản hồi tự động
         let response = null;
-        const messageContent = message.content.trim().toLowerCase();
+        const originalMessageContent = message.content.trim();
 
+        // Tìm tất cả các ID người dùng trong tin nhắn
+        const userIdMatches = originalMessageContent.match(/<@(\d+)>/g) || [];
+
+        // Tạo danh sách ID duy nhất từ tin nhắn
+        const uniqueUserIds = [...new Set(userIdMatches.map(match => match.replace(/<@(\d+)>/, '$1')))];
+
+        let formattedMessageContent = originalMessageContent;
+        if (userIdMatches.length > 0) {
+            // Thay thế tất cả các <@id> bằng {tag}
+            formattedMessageContent = formattedMessageContent.replace(/<@(\d+)>/g, '{tag}');
+
+            // Đảm bảo chỉ có một {tag} trong nội dung tin nhắn
+            formattedMessageContent = formattedMessageContent.replace(/{tag}(\s+{tag})+/g, '{tag}');
+        }
+
+        // So sánh nội dung tin nhắn đã thay thế với từ khóa
         for (const [keyword, resp] of responses.entries()) {
-            if (messageContent === keyword) {
+            const normalizedKeyword = diacritics.remove(keyword.toLowerCase()); // Xóa dấu và chuyển về chữ thường
+            const formattedMessageContentNew = diacritics.remove(formattedMessageContent.toLowerCase());
+            if (formattedMessageContentNew === normalizedKeyword) {
                 response = resp;
                 break;
             }
         }
 
         if (response) {
-            await message.reply(response);
+            try {
+                // Tạo mention cho người gửi
+                const userMention = `<@${message.author.id}>`;
+    
+                // Kiểm tra xem phản hồi có chứa {user} không
+                if (response.includes('{user}')) {
+                    // Thay thế {user} bằng mention của người dùng
+                    response = response.replace("{user}", userMention);
+                }
+
+                // Thay thế một {tag} bằng tất cả các ID người dùng
+                if (uniqueUserIds.length > 0) {
+                    const mentions = uniqueUserIds.map(id => `<@${id}>`).join(' ');
+                    response = response.replace(/{tag}/, mentions);
+                }
+                
+                await message.reply(response);
+            } catch (error) {
+                console.error('Đã xảy ra lỗi khi xử lý người dùng:', error);
+                await message.reply('Đã xảy ra lỗi khi gửi phản hồi.');
+            }
         }
     });
 }

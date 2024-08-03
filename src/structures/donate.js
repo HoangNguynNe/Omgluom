@@ -64,9 +64,23 @@ class Donate {
             );
         });
     }
-    
-    
 
+    async SumDonate(userID) {
+        return new Promise((resolve, reject) => {
+            sql.query(
+                'SELECT SUM(moneyowo) AS total FROM `donate` WHERE `userID` = ?',
+                [userID],
+                (err, results) => {
+                    if (err) {
+                        console.error(err);
+                        return reject(err);
+                    }
+                    resolve(results[0].total || 0); // Ensure a default value of 0 if no donations
+                }
+            );
+        });
+    }
+    
     async getDonateMonths(userID) {
         return new Promise((resolve, reject) => {
             sql.query(

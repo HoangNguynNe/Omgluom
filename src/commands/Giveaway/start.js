@@ -1,4 +1,5 @@
 const ms = require('ms');
+const { PermissionsBitField } = require('discord.js');
 
 module.exports = {
   name: "start",
@@ -8,7 +9,7 @@ module.exports = {
   usage: "<PREFIX>startgiveaway [Thời Gian] [Số người thắng] [Tiêu đề]",
   run: async (client, message, args) => {
     // If the member doesn't have enough permissions
-    if (!message.member.permissions.has('VIEW_CHANNEL') && !message.member.roles.cache.some((r) => r.name === "Giveaways")) {
+    if (!message.member.permissions.has(PermissionsBitField.Flags.ManageMessages) && !message.member.roles.cache.some((r) => r.name === "Giveaways")) {
       return  message.reply(client.emoji.x + "**Bạn cần quyền **\`MANAGE_MESSAGES\`**để bắt đầu Giveaway!." + `\nSử dụng: **\`${client.config.PREFIX}start [Thời Gian] [Số người thắng] [Tiêu đề]\``);
     }
 
